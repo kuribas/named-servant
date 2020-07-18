@@ -8,7 +8,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE EmptyDataDecls #-}
 module Servant.Named (NamedQueryParam, OptionalQueryParam, NamedQueryParams,
-                      NamedQueryParam') where
+                      NamedQueryFlag, NamedQueryParam') where
 import Servant.API
 import Servant.API.Modifiers
 import Data.Proxy
@@ -57,3 +57,14 @@ instance (KnownSymbol sym, ToHttpApiData v, HasLink sub)
     toLink toA _ l (Arg params) =
       toLink toA (Proxy :: Proxy (QueryParams sym v :> sub)) l params
 
+-- | Like `QueryFlag, but extracts a named type @named `:!` Bool@
+-- instead, where named corresponds to the query parameter string.
+data NamedQueryFlag (sym :: Symbol)
+instance (KnownSymbol sym, HasLink sub)
+    => HasLink (NamedQueryFlag sym :> sub)
+  where
+    type MkLink (NamedQueryFlag sym :> sub) a =
+      (sym :! Bool) -> MkLink sub a
+    toLink toA _ l (Arg qparam) =
+      toLink toA (Proxy :: Proxy (QueryFlag sym :> sub)) l qparam
+      
