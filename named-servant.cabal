@@ -13,12 +13,14 @@ source-repository head
     location: https://github.com/kuribas/named-servant
 
 library
+   default-language: Haskell2010
    Ghc-options: -Wall
    exposed-modules:
         Servant.Named
+        Servant.Record
    hs-source-dirs:
         src
    build-depends:
-        base,
+        base >= 4.7 && < 5,
         servant,
         named
