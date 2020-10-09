@@ -14,6 +14,7 @@ import Servant.API.Modifiers
 import Data.Proxy
 import GHC.TypeLits
 import Data.Functor.Identity
+import Data.Maybe
 import Named
 
 -- | Like `QueryParam'`, but instead of extracting a type @a@, it
@@ -46,16 +47,17 @@ type OptionalQueryParam = NamedQueryParam' [Optional, Strict]
 -- the query parameter string.
 type NamedQueryParam = NamedQueryParam' [Required, Strict]
 
--- | Like `QueryParams`, but extracts a named type @named `:!` [a]@
+-- | Like `QueryParams`, but extracts a named type @named `:?` [a]@
 -- instead, where named corresponds to the query parameter string.
 data NamedQueryParams (sym :: Symbol) (a :: *)
 
 instance (KnownSymbol sym, ToHttpApiData v, HasLink sub)
          => HasLink (NamedQueryParams sym v :> sub)
   where
-    type MkLink (NamedQueryParams sym v :> sub) a = sym :! [v] -> MkLink sub a
-    toLink toA _ l (Arg params) =
-      toLink toA (Proxy :: Proxy (QueryParams sym v :> sub)) l params
+    type MkLink (NamedQueryParams sym v :> sub) a = sym :? [v] -> MkLink sub a
+    toLink toA _ l (ArgF params) =
+      toLink toA (Proxy :: Proxy (QueryParams sym v :> sub)) l $
+      fromMaybe [] params
 
 -- | Like `QueryFlag, but extracts a named type @named `:!` Bool@
 -- instead, where named corresponds to the query parameter string.
