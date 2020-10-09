@@ -1,7 +1,7 @@
 cabal-version: 1.12
 name: named-servant
 description: support named parameters in servant using the named package
-version: 0.1.1
+version: 0.2.0
 maintainer: kristof@resonata.be
 copyright: Kristof Bastiaensen 2020
 license: BSD3

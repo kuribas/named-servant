@@ -49,6 +49,7 @@ type NamedQueryParam = NamedQueryParam' [Required, Strict]
 
 -- | Like `QueryParams`, but extracts a named type @named `:?` [a]@
 -- instead, where named corresponds to the query parameter string.
+-- The default value is the empty list `[]`
 data NamedQueryParams (sym :: Symbol) (a :: *)
 
 instance (KnownSymbol sym, ToHttpApiData v, HasLink sub)
@@ -59,14 +60,15 @@ instance (KnownSymbol sym, ToHttpApiData v, HasLink sub)
       toLink toA (Proxy :: Proxy (QueryParams sym v :> sub)) l $
       fromMaybe [] params
 
--- | Like `QueryFlag, but extracts a named type @named `:!` Bool@
+-- | Like `QueryFlag, but extracts a named type @named `:?` Bool@
 -- instead, where named corresponds to the query parameter string.
+-- The default value is False.
 data NamedQueryFlag (sym :: Symbol)
 instance (KnownSymbol sym, HasLink sub)
     => HasLink (NamedQueryFlag sym :> sub)
   where
     type MkLink (NamedQueryFlag sym :> sub) a =
-      (sym :! Bool) -> MkLink sub a
-    toLink toA _ l (Arg qparam) =
-      toLink toA (Proxy :: Proxy (QueryFlag sym :> sub)) l qparam
-      
+      (sym :? Bool) -> MkLink sub a
+    toLink toA _ l (ArgF qparam) =
+      toLink toA (Proxy :: Proxy (QueryFlag sym :> sub)) l $
+      fromMaybe False qparam
