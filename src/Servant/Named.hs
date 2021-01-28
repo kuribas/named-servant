@@ -7,6 +7,32 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE EmptyDataDecls #-}
+
+{-|
+This module uses the named package to match names with parameters. For example, this api:
+
+@
+type API = "users" :> (QueryParam "category" Category :>
+                       QueryParam' '[Required, Strict] "sort_by" SortBy :>
+                       QueryFlag "with_schema" :>
+                       QueryParams "filters" Filter :>
+                       Get '[JSON] User
+@
+
+can be written with named:
+
+@
+type API = "users" :> (OptionalQueryParam "category" Category :>
+                       NamedQueryParam "sort_by" SortBy :>
+                       NamedQueryFlag "with_schema" :>
+                       NamedQueryParams "filters" Filter :>
+                       Get '[JSON] User
+@
+
+The servant-named-client and servant-named-server will create
+functions that use the `named` package to match the names with the
+parameters.
+-}
 module Servant.Named (NamedQueryParam, OptionalQueryParam, NamedQueryParams,
                       NamedQueryFlag, NamedQueryParam') where
 import Servant.API
@@ -24,6 +50,15 @@ data NamedQueryParam' (mods :: [*]) (sym :: Symbol) (a :: *)
 
 unarg :: NamedF f a name -> f a
 unarg (ArgF a) = a
+
+-- | type family to rewrite a named queryparam to a regular
+-- queryparam.  Useful to define instances for classes that extract
+-- information from the API type., for example servant-foreign, or
+-- servant-swagger.
+type family UnNameParam x where
+  UnNameParam (NamedQueryParams sym a) = QueryParams sym a
+  UnNameParam (NamedQueryParam' mods sym a) = QueryParam' mods sym a
+  UnNameParam (NamedQueryFlag sym) = QueryFlag sym
 
 instance (KnownSymbol sym, ToHttpApiData v, HasLink sub,
           SBoolI (FoldRequired mods))

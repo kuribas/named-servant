@@ -15,6 +15,31 @@ import Data.Proxy
 import GHC.TypeLits
 import GHC.Generics
 
+-- | RecordParam uses the fields in the record to represent the
+-- parameters.  The name of the field is used as parameter name, and
+-- the type is the return type.  For example, this api:
+--
+-- @
+-- type API = "users" :> (QueryParam "category" Category :>
+--                        QueryParam' '[Required, Strict] "sort_by" SortBy :>
+--                        QueryFlag "with_schema" :>
+--                        QueryParams "filters" Filter :>
+--                        Get '[JSON] User
+-- @
+-- 
+-- can be written with records:
+--
+-- @
+-- data UserParams = UserParams
+--   { category :: Maybe Category
+--   , sort_by :: Sortby
+--   , with_schema :: Bool
+--   , filters :: [Filter]
+--   }
+--
+-- type API = "users" :> RecordParam UserParams :> Get '[JSON] User
+-- @
+
 data RecordParam (a :: *)
 
 type family ServantAppend x y where
