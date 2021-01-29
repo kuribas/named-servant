@@ -23,5 +23,5 @@ library
         src
    build-depends:
         base >= 4.7 && < 5,
-        servant >= 0.17 && < 0.18,
+        servant >= 0.17 && < 0.19,
         named >= 0.3 && < 0.4
